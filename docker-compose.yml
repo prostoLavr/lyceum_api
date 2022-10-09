@@ -1,0 +1,27 @@
+version: '3'
+services:
+  lyceum_api:
+    image: lyceum-api
+    restart: always
+    depends_on:
+      - "postgres"
+    env_file:
+      - .variables.env
+    networks:
+      front_net:
+      default:
+
+  postgres:
+    image: postgres:12.12
+    restart: always
+    env_file:
+      - .variables.env
+    ports:
+      - "5432:5432"
+    networks:
+      default:
+
+networks:
+  front-net:
+    external: true
+
