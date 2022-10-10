@@ -7,7 +7,7 @@ class Lesson(SqlAlchemyBase):
 
     lesson_id = sa.Column(sa.Integer, primary_key=True, 
                           autoincrement=True, index=True)
-    day_id = sa.Column(sa.Integer, sa.ForeignKey("days.day_id"), nullable=False)
+    day = sa.Column(sa.Integer, nullable=False)
     start_time = sa.Column(sa.Time)
     end_time = sa.Column(sa.Time)
     teacher_id = sa.Column(sa.Integer, sa.ForeignKey("teachers.teacher_id"))
