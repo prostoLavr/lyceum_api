@@ -1,8 +1,16 @@
 from flask import Flask, request
 import json
+from sqlalchemy_sessions import global_init
+from data import db_manager
 
+
+
+global_init("sqlite:///db.sqlite")
 
 wsgi_app = Flask(__name__)
+
+db_manager.create_default()
+
 
 lessons_type = dict[str, dict[str, str or bool or list[tuple]]]
 
