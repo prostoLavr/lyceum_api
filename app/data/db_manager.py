@@ -5,17 +5,19 @@ from data.subject import Subject
 from data.teacher import Teacher
 
 
-from sqlalchemy_sessions import search_func, add_func
+from sqlalchemy_sessions import search_func, add_func, edit_func, search_func, remove_func
 from sqlalchemy.orm import Session
 
 from datetime import time
+from typing import Optional
+
 
 @add_func
 def create(db_sess: Session, cls, *args, **kwargs):
     return cls(*args, **kwargs)
 
 
-@add_func
+@edit_func
 def create_default(db_sess: Session):
     school = create(
             db_sess, School, name="Lyceum 2", address="Irkutsk"
@@ -39,13 +41,7 @@ def create_default(db_sess: Session):
     )
 
 
+@search_func
+def api_lessons(school_class: Optional[str], required=False):
+    pass
 
-@add_func
-def create_school(_: Session, name: str, address: str):
-    return School(name=name, address=address)
-
-
-@add_func
-def create_school(db_sess: Session, name: str, address: str):
-    return School(name=name, address=address)
-    
