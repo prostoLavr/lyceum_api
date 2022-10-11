@@ -6,7 +6,7 @@ COPY wheels /wheels
 RUN /usr/bin/python3 -m pip install --no-cache -r requirements.txt && \
     /usr/bin/python3 -m pip install --no-cache /wheels/*
 
-COPY wsgi.py ./
+COPY app/ ./
 
 CMD ["/usr/bin/python3", \
      "-m", "gunicorn", \

@@ -2,10 +2,15 @@ from flask import Flask, request
 import json
 from sqlalchemy_sessions import global_init
 from data import db_manager
+import os
 
 
-
-global_init("sqlite:///db.sqlite")
+user = os.getenv("POSTGRES_USER")
+password = os.getenv("POSTGRES_PASSWORD")
+database = os.getenv("POSTGRES_DB")
+port = os.getenv("POSTGRES_PORT") or 5432
+host = os.getenv("POSTGRES_HOST")
+global_init(f"postgresql://{user}:{password}@{host}:{port}/{database}")
 
 wsgi_app = Flask(__name__)
 
