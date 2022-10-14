@@ -5,7 +5,7 @@ from data.subject import Subject
 from data.teacher import Teacher
 
 
-from sqlalchemy_sessions import search_func, add_func, edit_func, search_func, remove_func
+from sqlalchemy_sessions import search_func, add_func, edit_func, remove_func
 from sqlalchemy.orm import Session
 
 from datetime import time
