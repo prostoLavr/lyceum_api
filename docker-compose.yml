@@ -4,7 +4,7 @@ services:
     image: lyceum-api
     restart: always
     ports:
-      - "8080:80"
+      - "8439:80"
     depends_on:
       - "postgres"
     env_file:
