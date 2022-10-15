@@ -29,7 +29,7 @@ else:
         port: None
         host: None
     
-    args = VoidArgs()
+    args = VoidArgs(None, None, None, None, None)
     
 
 if sqlite_path is None:
