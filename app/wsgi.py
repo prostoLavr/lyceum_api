@@ -1,16 +1,32 @@
 from flask import Flask, request
 import json
 from sqlalchemy_sessions import global_init
-from data import db_manager
+import db_manager
 import os
+import argparse
 
 
-user = os.getenv("POSTGRES_USER")
-password = os.getenv("POSTGRES_PASSWORD")
-database = os.getenv("POSTGRES_DB")
-port = os.getenv("POSTGRES_PORT") or 5432
-host = os.getenv("POSTGRES_HOST")
-global_init(f"postgresql://{user}:{password}@{host}:{port}/{database}")
+parser = argparse.ArgumentParser()
+parser.add_argument('-s', '--sqlite')
+parser.add_argument('-u', '--user')
+parser.add_argument('-P', '--password')
+parser.add_argument('-H', '--host')
+parser.add_argument('-d', '--database')
+parser.add_argument('-p', '--port')
+
+args = parser.parse_args()
+sqlite_path = getattr(args, 'sqlite')
+
+if sqlite_path is None:
+    args = parser.parse_args()
+    user = args.user or os.getenv("POSTGRES_USER")
+    password = args.password or os.getenv("POSTGRES_PASSWORD")
+    database = args.database or os.getenv("POSTGRES_DB")
+    port = args.port or os.getenv("POSTGRES_PORT") or 5432
+    host = args.host or os.getenv("POSTGRES_HOST")
+    global_init(f"postgresql://{user}:{password}@{host}:{port}/{database}")
+else:
+    global_init(f"sqlite://{sqlite_path}")
 
 wsgi_app = Flask(__name__)
 
