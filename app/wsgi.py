@@ -4,18 +4,33 @@ from sqlalchemy_sessions import global_init
 import db_manager
 import os
 import argparse
+from dataclasses import dataclass
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument('-s', '--sqlite')
-parser.add_argument('-u', '--user')
-parser.add_argument('-P', '--password')
-parser.add_argument('-H', '--host')
-parser.add_argument('-d', '--database')
-parser.add_argument('-p', '--port')
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-s', '--sqlite')
+    parser.add_argument('-u', '--user')
+    parser.add_argument('-P', '--password')
+    parser.add_argument('-H', '--host')
+    parser.add_argument('-d', '--database')
+    parser.add_argument('-p', '--port')
+    
+    args = parser.parse_args()
+    sqlite_path = getattr(args, 'sqlite')
+else:
+    sqlite_path = None
 
-args = parser.parse_args()
-sqlite_path = getattr(args, 'sqlite')
+    @dataclass
+    class VoidArgs:
+        user: None
+        password: None
+        database: None
+        port: None
+        host: None
+    
+    args = VoidArgs()
+    
 
 if sqlite_path is None:
     args = parser.parse_args()
