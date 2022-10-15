@@ -33,7 +33,6 @@ else:
     
 
 if sqlite_path is None:
-    args = parser.parse_args()
     user = args.user or os.getenv("POSTGRES_USER")
     password = args.password or os.getenv("POSTGRES_PASSWORD")
     database = args.database or os.getenv("POSTGRES_DB")
