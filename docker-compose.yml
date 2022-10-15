@@ -23,38 +23,6 @@ services:
     networks:
       default:
 
-  nginx:
-    image: nginx:stable
-    restart: always
-    networks:
-      front_net:
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - "./config:/etc/nginx/conf.d:ro"
-      - certbot-conf:/etc/letsencrypt
-      - certbot-webroot:/var/www/certbot
-    command: "/bin/sh -c 'while :; do \
-      sleep 6h & wait $${!}; nginx -s reload; \
-      done & nginx -g \"daemon off;\"'"
-
-  certbot:
-    image: certbot/certbot:latest
-    restart: always
-    networks:
-      default:
-    volumes:
-      - certbot-conf:/etc/letsencrypt
-      - certbot-webroot:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do \
-      certbot renew; sleep 12h & wait $${!}; done;'"
-
-volumes:
-  certbot-conf:
-  certbot-webroot:
-
-
 networks:
   front_net:
     external: true
