@@ -59,22 +59,18 @@ def get_lessons(
         school_id: Optional[int] = None,
         school_class_id: Optional[int] = None
         ) -> lessons_type:
+
     if school_id is not None:
-        db_manager.get_lessons_by_school_id(school_id)
+        return db_manager.get_lessons_by_school_id(school_id)
     elif school_class_id is not None:
-        print(db_manager.get_lessons_by_school_class_id(school_class_id))
+        return db_manager.get_lessons_by_school_class_id(school_class_id)
     else:
-        raise Exception
+        raise ValueError("Expected school_id or school_class_id")
 
-    return {
-            "name": "математика", 
-            "required": True, 
-            "times": {"10Б": {"monday": [[8, 0, 8, 30], [8, 40, 9, 10]]}}, 
-            "teacher": "Full Teacher Name"
-    }
-
+    return {"msg": "Sorry, it yet does not work"}
 
 def to_json(data: dict) -> str:
+    print(f'{data=}')
     return json.dumps(data, ensure_ascii=False).encode("utf8")
 
 
