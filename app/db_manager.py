@@ -13,14 +13,16 @@ from typing import Optional
 
 
 @add_func
-def create(db_sess: Session, cls, *args, **kwargs):
-    return cls(*args, **kwargs)
+def create(db_sess: Session, cls, **kwargs):
+    return cls(**kwargs)
 
 
 @edit_func
 def create_if_nonexist(db_sess: Session, cls, **kwargs):
     query = db_sess.query(cls).filter_by(**kwargs)
-    return query.one_or_none() or cls(**kwargs)
+    if (db_object := query.one_or_none()) is not None:
+        return db_object
+    return create(db_sess, cls, **kwargs)
 
 
 @edit_func
@@ -37,7 +39,8 @@ def create_default(db_sess: Session):
     )
     subject = create_if_nonexist(
             db_sess, Subject, name="Math", 
-            school_class_id=school_class.school_class_id
+            school_class_id=school_class.school_class_id,
+            teacher_id=teacher.teacher_id
     )
     lesson = create_if_nonexist(
             db_sess, Lesson, subject_id=subject.subject_id, 
