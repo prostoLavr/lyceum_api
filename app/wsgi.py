@@ -73,19 +73,22 @@ def to_json(data: dict) -> str:
     print(f'{data=}')
     return json.dumps(data, ensure_ascii=False).encode("utf8")
 
+@wsgi_app.route("/school")
+def schools() -> str:
+    return to_json(db_manager.get_schools())
 
 @wsgi_app.route("/school/<int:school_id>/school_class")
-def school_list(school_id: int) -> str:
+def school_classes_list(school_id: int) -> str:
     schools = db_manager.get_school_classes_by_school_id(school_id)
     return to_json(schools)
 
 @wsgi_app.route("/school/<int:school_id>/lesson")
-def all_lessons(school_id: int) -> str:
+def lessons_for_school(school_id: int) -> str:
     lessons = get_lessons(school_id=school_id)
     return to_json(lessons)
 
 @wsgi_app.route("/school_class/<int:school_class_id>/lesson")
-def class_lessons(school_class_id: int) -> str:
+def lessons_for_school_class(school_class_id: int) -> str:
     lessons = get_lessons(school_class_id=school_class_id)
     return to_json(lessons)
 
