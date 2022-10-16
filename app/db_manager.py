@@ -81,7 +81,7 @@ def add_lesson_info_to_times(lesson_info, times):
         time_for_class[day_name].append(start_end_time)
             
 
-def format_lessons_by_school_class_id(query_result: list[tuple]) -> dict:
+def format_lessons(query_result: list[tuple]) -> dict:
     output = {'lessons': []}
     lessons = output['lessons']
     for row in query_result:
@@ -89,11 +89,13 @@ def format_lessons_by_school_class_id(query_result: list[tuple]) -> dict:
     return output 
 
 
+def get_lessons_by_school_class_id(school_class_id: Optional[int]):
+    data = _get_lessons_by_school_class_id(school_class_id)
+    return format_lessons(data)
+
 @search_func
-def get_lessons_by_school_class_id(
-        db_sess: Session, 
-        school_class_id: Optional[int], 
-        required=False):
+def _get_lessons_by_school_class_id(
+        db_sess: Session, school_class_id: Optional[int]):
 
     query = db_sess.query(
             Subject.name,
@@ -125,5 +127,40 @@ def get_lessons_by_school_class_id(
             Subject.teacher_id == Teacher.teacher_id
     )
 
-    return format_lessons_by_school_class_id(query.all())
+    return query.all()
+
+def format_school_classes(query_result: list[tuple]) -> dict:
+    keys = ['id', 'number', 'letter']
+    school_classes = [dict(zip(keys, row)) for row in query_result]
+    return {'school_classes': school_classes}
+
+
+def get_school_classes_by_school_id(school_id: int) -> dict:
+    data = _get_school_classes_by_school_id(school_id)
+    return format_school_classes(data)
+
+
+@search_func
+def _get_school_classes_by_school_id(db_sess: Session, 
+                                      school_id: int) -> list[int]:
+    query = db_sess.query(
+            SchoolClass.school_class_id, 
+            SchoolClass.number,
+            SchoolClass.letter
+    )
+    query = query.filter_by(school_id=school_id)
+    return query.all()
+
+def get_lessons_by_school_id(school_id: int) -> dict:
+    data = _get_lessons_by_school_id(school_id)
+    return format_lessons(data)
+
+
+@search_func
+def _get_lessons_by_school_id(db_sess: Session, school_id: int) -> dict:
+    school_classes = _get_school_classes_by_school_id(db_sess, school_id)
+    output = []
+    for school_class_id, *_ in school_classes:
+        output.extend(_get_lessons_by_school_class_id(school_class_id))
+    return output
 
