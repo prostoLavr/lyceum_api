@@ -32,7 +32,7 @@ def create_default(db_sess: Session):
             db_sess, School, name="Лицей №2", address="Иркутск"
     )
     teacher = create_if_nonexist(
-            db_sess, Teacher, name="Мария Александровна"
+            db_sess, Teacher, name="Мария Александровна Зубакова"
     )
     school_class = create_if_nonexist(
             db_sess, SchoolClass, number=10, letter='Б', 
