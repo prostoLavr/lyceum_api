@@ -1,12 +1,16 @@
 from flask import Flask, request
-import json
+
 from sqlalchemy_sessions import global_init
 import db_manager
+
 import os
 import argparse
 from dataclasses import dataclass
+from typing import Optional
+import json
 
 
+# Lawrence's shit code to run with args 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', '--sqlite')
@@ -20,7 +24,7 @@ if __name__ == "__main__":
     sqlite_path = getattr(args, 'sqlite')
 else:
     sqlite_path = None
-
+    # It's is real trash
     @dataclass
     class VoidArgs:
         user: None
@@ -30,6 +34,7 @@ else:
         host: None
     
     args = VoidArgs(None, None, None, None, None)
+    # More Nones
     
 
 if sqlite_path is None:
@@ -40,7 +45,7 @@ if sqlite_path is None:
     host = args.host or os.getenv("POSTGRES_HOST")
     global_init(f"postgresql://{user}:{password}@{host}:{port}/{database}")
 else:
-    global_init(f"sqlite://{sqlite_path}")
+    global_init(f"sqlite:///{sqlite_path}")
 
 wsgi_app = Flask(__name__)
 
@@ -50,7 +55,17 @@ db_manager.create_default()
 lessons_type = dict[str, dict[str, str or bool or list[list[int]]]]
 
 
-def get_lessons(school_class: str or None) -> lessons_type:
+def get_lessons(
+        school_id: Optional[int] = None,
+        school_class_id: Optional[int] = None
+        ) -> lessons_type:
+    if school_id is not None:
+        db_manager.get_lessons_by_school_id(school_id)
+    elif school_class_id is not None:
+        print(db_manager.get_lessons_by_school_class_id(school_class_id))
+    else:
+        raise Exception
+
     return {
             "name": "математика", 
             "required": True, 
@@ -59,13 +74,20 @@ def get_lessons(school_class: str or None) -> lessons_type:
     }
 
 
+def to_json(data: dict) -> str:
+    return json.dumps(data, ensure_ascii=False).encode("utf8")
 
-@wsgi_app.route("/lessons")
-def lessons() -> str:
-    school_class = request.args.get("class")
-    lessons = get_lessons(school_class)
-    json_lessons = json.dumps(lessons, ensure_ascii=False).encode("utf8")
-    return json_lessons
+
+@wsgi_app.route("/school/<int:school_id>")
+def all_lessons(school_id: int) -> str:
+    lessons = get_lessons(school_id=school_id)
+    return to_json(lessons)
+
+
+@wsgi_app.route("/school_class/<int:school_class_id>")
+def class_lessons(school_class_id: int) -> str:
+    lessons = get_lessons(school_class_id=school_class_id)
+    return to_json(lessons)
 
 
 if __name__ == "__main__":
