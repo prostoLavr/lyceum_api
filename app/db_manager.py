@@ -29,37 +29,37 @@ def create_if_nonexist(db_sess: Session, cls, **kwargs):
 @edit_func
 def create_default(db_sess: Session):
     school = create_if_nonexist(
-            db_sess, School, name="Лицей №2", address="Иркутск"
+            db_sess, School, school_id=1, name="Лицей №2", address="Иркутск"
     )
     teacher = create_if_nonexist(
-            db_sess, Teacher, name="Мария Александровна"
+            db_sess, Teacher, teacher_id=1, name="Мария Александровна Зубакова"
     )
     school_class = create_if_nonexist(
-            db_sess, SchoolClass, number=10, letter='Б', 
+            db_sess, SchoolClass, school_class_id=1, number=10, letter='Б', 
             school_id=school.school_id
     )
     subject = create_if_nonexist(
-            db_sess, Subject, name="Математика",
+            db_sess, Subject, name="Математика", subject_id=1,
             school_class_id=school_class.school_class_id,
             teacher_id=teacher.teacher_id
     )
     lesson = create_if_nonexist(
-            db_sess, Lesson, subject_id=subject.subject_id, 
+            db_sess, Lesson, subject_id=subject.subject_id, lesson_id=1,
             teacher_id=teacher.teacher_id, start_time=time(8, 0), 
             end_time=time(8, 30), day=0
     )
 
 def add_row_to_lessons(row, lessons):
     row = list(row)
+    lesson_id, *row = row
+    print(f'{row=}')
     for lesson in lessons:
-        lesson_info = [lesson['subject'], 
-                       lesson['required'], 
-                       lesson['teacher']]
-        if lesson_info == row[:3]:
+        if lesson['id'] == lesson_id:
             add_lesson_info_to_times(row[3:], lesson['times'])
             break
     else:
-        lesson_dict = {'name': row[0], 
+        lesson_dict = {'id': lesson_id,
+                       'name': row[0], 
                        'required': row[1], 
                        'teacher': row[2], 
                        'times': {}}
@@ -98,6 +98,7 @@ def _get_lessons_by_school_class_id(
         db_sess: Session, school_class_id: Optional[int]):
 
     query = db_sess.query(
+            Lesson.lesson_id,
             Subject.name,
             Subject.required,
             Teacher.name,
@@ -128,6 +129,21 @@ def _get_lessons_by_school_class_id(
     )
 
     return query.all()
+
+
+@search_func
+def _get_schools(db_sess: Session) -> list[tuple]:
+    return db_sess.query(School.school_id, School.name, School.address).all()
+
+
+def format_schools(query_result: list[tuple]) -> dict:
+    keys = ['id', 'name', 'address']
+    return {'schools': [dict(zip(keys, row)) for row in query_result]}
+
+
+def get_schools() -> dict:
+    return format_schools(_get_schools())
+
 
 def format_school_classes(query_result: list[tuple]) -> dict:
     keys = ['id', 'number', 'letter']
