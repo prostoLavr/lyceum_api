@@ -51,15 +51,15 @@ def create_default(db_sess: Session):
 
 def add_row_to_lessons(row, lessons):
     row = list(row)
+    lesson_id, *row = row
+    print(f'{row=}')
     for lesson in lessons:
-        lesson_info = [lesson['subject'], 
-                       lesson['required'], 
-                       lesson['teacher']]
-        if lesson_info == row[:3]:
+        if lesson['id'] == lesson_id:
             add_lesson_info_to_times(row[3:], lesson['times'])
             break
     else:
-        lesson_dict = {'name': row[0], 
+        lesson_dict = {'id': lesson_id,
+                       'name': row[0], 
                        'required': row[1], 
                        'teacher': row[2], 
                        'times': {}}
@@ -98,6 +98,7 @@ def _get_lessons_by_school_class_id(
         db_sess: Session, school_class_id: Optional[int]):
 
     query = db_sess.query(
+            Lesson.lesson_id,
             Subject.name,
             Subject.required,
             Teacher.name,
