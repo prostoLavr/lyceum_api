@@ -5,40 +5,21 @@ import db_manager
 
 import os
 import argparse
-from dataclasses import dataclass
 from typing import Optional
 import json
 
-# Lawrence's shit code to run with args
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-s', '--sqlite')
-    parser.add_argument('-u', '--user')
-    parser.add_argument('-P', '--password')
-    parser.add_argument('-H', '--host')
-    parser.add_argument('-d', '--database')
-    parser.add_argument('-p', '--port')
 
-    args = parser.parse_args()
-    sqlite_path = getattr(args, 'sqlite')
-else:
-    sqlite_path = None
+parser = argparse.ArgumentParser()
+parser.add_argument('-s', '--sqlite', default=None)
+parser.add_argument('-u', '--user', default=None)
+parser.add_argument('-P', '--password', default=None)
+parser.add_argument('-H', '--host', default=None)
+parser.add_argument('-d', '--database', default=None)
+parser.add_argument('-p', '--port', default=None)
+args = parser.parse_args()
 
 
-    # It's is real trash
-    @dataclass
-    class VoidArgs:
-        user: None
-        password: None
-        database: None
-        port: None
-        host: None
-
-
-    args = VoidArgs(None, None, None, None, None)
-    # More Nones
-
-if sqlite_path is None:
+if args.sqlite is None:
     user = args.user or os.getenv("POSTGRES_USER")
     password = args.password or os.getenv("POSTGRES_PASSWORD")
     database = args.database or os.getenv("POSTGRES_DB")
@@ -46,27 +27,23 @@ if sqlite_path is None:
     host = args.host or os.getenv("POSTGRES_HOST")
     global_init(f"postgresql://{user}:{password}@{host}:{port}/{database}")
 else:
-    global_init(f"sqlite:///{sqlite_path}")
+    global_init(f"sqlite:///{args.sqlite}")
 
 wsgi_app = Flask(__name__)
 
 db_manager.create_default()
 
-lessons_type = dict[str, dict[str, str or bool or list[list[int]]]]
+right_lessons_type = dict[str, dict[str, str or bool or list[list[int]]]]
 error_msg_type = dict[str, str]
+lessons_type = right_lessons_type | error_msg_type
 page_type = str | bytes
 
 
 def get_lessons(
         school_id: Optional[int] = None,
-        school_class_id: Optional[int] = None
-) -> lessons_type | error_msg_type:
-    if school_id is not None:
-        return db_manager.get_lessons_by_school_id(school_id)
-    elif school_class_id is not None:
-        return db_manager.get_lessons_by_school_class_id(school_class_id)
-    else:
-        raise ValueError("Expected school_id or school_class_id")
+        school_class_id: Optional[int] = None) -> lessons_type:
+    return db_manager.get_lessons(school_id=school_id,
+                                  school_class_id=school_class_id)
 
 
 def to_json(data: dict) -> bytes:
@@ -80,8 +57,8 @@ def schools() -> page_type:
 
 @wsgi_app.route("/school/<int:school_id>/school_class")
 def school_classes_list(school_id: int) -> page_type:
-    schools = db_manager.get_school_classes_by_school_id(school_id)
-    return to_json(schools)
+    school_classes = db_manager.get_school_classes(school_id)
+    return to_json(school_classes)
 
 
 @wsgi_app.route("/school/<int:school_id>/lesson")

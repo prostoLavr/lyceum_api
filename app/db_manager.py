@@ -129,7 +129,8 @@ def __add_lesson_query_result_to_list_of_lesson_times(
                 }]
     """
     for lesson_times_for_class in list_of_lesson_times:
-        if lesson_times_for_class['school_class_id'] == lesson_query_result.lesson_id:
+        if (lesson_times_for_class['school_class_id'] ==
+                lesson_query_result.lesson_id):
             break  # lesson_times_for_class is using below
     else:
         lesson_times_for_class = {"school_class_id":
@@ -149,23 +150,22 @@ def __add_lesson_query_result_to_list_of_lesson_times(
 
 def __convert_lesson_query_result_to_dict(
         lesson_query_result: list[__OneLessonQueryResult]) -> dict:
-
+    """
+        Convert __OneLessonQueryResult instance to json-like dict
+    """
     output = {'lessons': []}
     for lesson_query_result in lesson_query_result:
         __add_new_lesson_to_lesson_list(lesson_query_result, output['lessons'])
     return output
 
 
-def get_lessons_by_school_class_id(school_class_id: Optional[int]):
-    data = __get_lessons_by_school_class_id(school_class_id)
-    return __convert_lesson_query_result_to_dict(data)
-
-
 @search_func
 def __get_lessons_by_school_class_id(
         db_sess: Session,
-        school_class_id: Optional[int]) -> list[__OneLessonQueryResult]:
-
+        school_class_id: int) -> list[__OneLessonQueryResult]:
+    """
+        Find all lesson for school_
+    """
     query = db_sess.query(
         Lesson.lesson_id,
         Subject.name,
@@ -212,6 +212,10 @@ def __format_schools(query_result: list[tuple]) -> dict:
 
 
 def get_schools() -> dict:
+    """
+        Public API method. Get list of schools. In the future maybe will have
+        a param of user's sity.
+    """
     return __format_schools(__get_schools())
 
 
@@ -221,14 +225,21 @@ def __format_school_classes(query_result: list[tuple]) -> dict:
     return {'school_classes': school_classes}
 
 
-def get_school_classes_by_school_id(school_id: int) -> dict:
-    data = __get_school_classes_by_school_id(school_id)
+def get_school_classes(school_id: Optional[int]) -> dict:
+    """
+        Public API method. Get list of school classes filter by school_id.
+        Function returns full list when school_id is None
+    """
+    if school_id is None:
+        raise NotImplementedError("get_school_classes method is not yet allow "
+                                  "None value. It will work in future.")
+    data = __get_school_classes(school_id)
     return __format_school_classes(data)
 
 
 @search_func
-def __get_school_classes_by_school_id(db_sess: Session,
-                                      school_id: int) -> list[tuple]:
+def __get_school_classes(db_sess: Session,
+                         school_id: int) -> list[tuple]:
     query = db_sess.query(
         SchoolClass.school_class_id,
         SchoolClass.number,
@@ -238,8 +249,23 @@ def __get_school_classes_by_school_id(db_sess: Session,
     return query.all()
 
 
-def get_lessons_by_school_id(school_id: int) -> dict:
-    data = __get_lessons_by_school_id(school_id)
+def get_lessons(*args, school_id: Optional[int],
+                school_class_id: Optional[int]) -> dict:
+    """
+        Public API method. Get lessons for school_id or school_class_id.
+        Do not use all args but keyword args school_id or school_class_id.
+        In future the method will have an optional parameter teacher_id
+        to get lessons of a teacher.
+    """
+    if args:
+        raise TypeError("Function does not expected positional parameters")
+    if school_class_id is not None:
+        data = __get_lessons_by_school_class_id(school_class_id)
+    elif school_id is not None:
+        data = __get_lessons_by_school_id(school_id)
+    else:
+        raise TypeError("Expected school_id or school_class_id, "
+                        "but they are None")
     return __convert_lesson_query_result_to_dict(data)
 
 
@@ -247,7 +273,7 @@ def get_lessons_by_school_id(school_id: int) -> dict:
 def __get_lessons_by_school_id(
         db_sess: Session,
         school_id: int) -> list[__OneLessonQueryResult]:
-    school_classes = __get_school_classes_by_school_id(db_sess, school_id)
+    school_classes = __get_school_classes(db_sess, school_id)
     output = []
     for school_class_id, *_ in school_classes:
         output.extend(__get_lessons_by_school_class_id(school_class_id))
