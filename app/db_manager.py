@@ -52,25 +52,43 @@ def create_default(db_sess: Session):
                         do not use this argument
     """
     school = _create_if_no_exists(
-        db_sess, School, school_id=1, name="Лицей №2", address="Иркутск"
+                db_sess, School, school_id=1, 
+                name="Лицей №2", address="Иркутск"
     )
     teacher = _create_if_no_exists(
-        db_sess, Teacher, teacher_id=1, name="Мария Александровна Зубакова"
+                db_sess, Teacher, teacher_id=1, 
+                name="Мария Александровна Зубакова"
     )
-    school_class = _create_if_no_exists(
-        db_sess, SchoolClass, school_class_id=1, number=10, letter='Б',
-        school_id=school.school_id
+    school_class1 = _create_if_no_exists(
+                db_sess, SchoolClass, school_class_id=1, number=10, letter='Б',
+                school_id=school.school_id
     )
-    subject = _create_if_no_exists(
-        db_sess, Subject, name="Математика", subject_id=1,
-        school_class_id=school_class.school_class_id,
-        teacher_id=teacher.teacher_id
+    school_class2 = _create_if_no_exists(
+                db_sess, SchoolClass, school_class_id=2, number=9, letter='В',
+                school_id=school.school_id
+    )
+
+    subject1 = _create_if_no_exists(
+                db_sess, Subject, name="Геометрия", subject_id=1,
+                school_class_id=school_class1.school_class_id,
+                teacher_id=teacher.teacher_id
+    )
+    subject2 = _create_if_no_exists(
+                db_sess, Subject, name="Физ-ра", subject_id=2,
+                school_class_id=school_class2.school_class_id,
+                teacher_id=teacher.teacher_id
     )
     _ = _create_if_no_exists(
-        db_sess, Lesson, subject_id=subject.subject_id, lesson_id=1,
-        teacher_id=teacher.teacher_id, start_time=dt.time(8, 0),
-        end_time=dt.time(8, 30), day=0
+                db_sess, Lesson, subject_id=subject1.subject_id, lesson_id=1,
+                teacher_id=teacher.teacher_id, start_time=dt.time(8, 0),
+                end_time=dt.time(8, 30), day=0
     )
+    _ = _create_if_no_exists(
+                db_sess, Lesson, subject_id=subject2.subject_id, lesson_id=2,
+                teacher_id=teacher.teacher_id, start_time=dt.time(8, 35),
+                end_time=dt.time(9, 5), day=0
+    )
+
 
 
 @dataclass
