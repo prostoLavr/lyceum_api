@@ -15,19 +15,24 @@ if __name__ == "__main__":
     args = parser.parse_args()
     global_init(f"sqlite:///{args.sqlite}")
 else: 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-u', '--user', default=None)
-    parser.add_argument('-P', '--password', default=None)
-    parser.add_argument('-H', '--host', default=None)
-    parser.add_argument('-d', '--database', default=None)
-    parser.add_argument('-p', '--port', default=None)
-    args = parser.parse_args()
-
-    user = args.user or os.getenv("POSTGRES_USER")
-    password = args.password or os.getenv("POSTGRES_PASSWORD")
-    database = args.database or os.getenv("POSTGRES_DB")
-    port = args.port or os.getenv("POSTGRES_PORT") or 5432
-    host = args.host or os.getenv("POSTGRES_HOST")
+# TODO: Add parsing config from args
+#     parser = argparse.ArgumentParser(conflict_handler='resolve')
+#     parser.add_argument('-u', '--user', default=None)
+#     parser.add_argument('-P', '--password', default=None)
+#     parser.add_argument('-H', '--host', default=None)
+#     parser.add_argument('-d', '--database', default=None)
+#     parser.add_argument('-p', '--port', default=None)
+#     args = parser.parse_args()
+#     user = args.user or os.getenv("POSTGRES_USER")
+#     password = args.password or os.getenv("POSTGRES_PASSWORD")
+#     database = args.database or os.getenv("POSTGRES_DB")
+#     port = args.port or os.getenv("POSTGRES_PORT") or 5432
+#     host = args.host or os.getenv("POSTGRES_HOST")
+    user = os.getenv("POSTGRES_USER")
+    password = os.getenv("POSTGRES_PASSWORD")
+    database = os.getenv("POSTGRES_DB")
+    port = os.getenv("POSTGRES_PORT") or 5432
+    host = os.getenv("POSTGRES_HOST")
 
     global_init(f"postgresql://{user}:{password}@{host}:{port}/{database}")
 
