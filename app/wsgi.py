@@ -9,25 +9,28 @@ from typing import Optional
 import json
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument('-s', '--sqlite', default=None)
-parser.add_argument('-u', '--user', default=None)
-parser.add_argument('-P', '--password', default=None)
-parser.add_argument('-H', '--host', default=None)
-parser.add_argument('-d', '--database', default=None)
-parser.add_argument('-p', '--port', default=None)
-args = parser.parse_args()
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-s', '--sqlite', default=None)
+    args = parser.parse_args()
+    global_init(f"sqlite:///{args.sqlite}")
+else: 
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-u', '--user', default=None)
+    parser.add_argument('-P', '--password', default=None)
+    parser.add_argument('-H', '--host', default=None)
+    parser.add_argument('-d', '--database', default=None)
+    parser.add_argument('-p', '--port', default=None)
+    args = parser.parse_args()
 
-
-if args.sqlite is None:
     user = args.user or os.getenv("POSTGRES_USER")
     password = args.password or os.getenv("POSTGRES_PASSWORD")
     database = args.database or os.getenv("POSTGRES_DB")
     port = args.port or os.getenv("POSTGRES_PORT") or 5432
     host = args.host or os.getenv("POSTGRES_HOST")
+
     global_init(f"postgresql://{user}:{password}@{host}:{port}/{database}")
-else:
-    global_init(f"sqlite:///{args.sqlite}")
+
 
 wsgi_app = Flask(__name__)
 
