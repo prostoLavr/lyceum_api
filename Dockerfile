@@ -1,17 +1,20 @@
-FROM python:3.10-slim
+FROM python:3.11-slim
+RUN  apt-get update && apt-get install -y libpq-dev build-essential libpcre3 libpcre3-dev
+RUN groupadd --gid 2000 node \
+  && useradd --uid 2000 --gid node --shell /bin/bash --create-home node
 WORKDIR /app
-RUN  apt-get update && apt-get install -y python3-pip libpq-dev python3-dev
 COPY requirements.txt ./
 COPY wheels /wheels
-RUN /usr/bin/python3 -m pip install --no-cache -r requirements.txt && \
-    /usr/bin/python3 -m pip install --no-cache /wheels/*
+RUN python3 -m pip install --no-cache -r requirements.txt && \
+    python3 -m pip install --no-cache /wheels/*
 
 COPY app/ ./
 
-CMD ["/usr/bin/python3", \
-     "-m", "gunicorn", \
-     "--pythonpath", "/usr/bin/python3", \
-     "--limit-request-field_size", "134217728", \
-     "--workers", "2", \
-     "--bind", "0.0.0.0:80", \
-     "wsgi:wsgi_app"]
+CMD ["uwsgi", \ 
+     "--http", ":80", \
+     "--wsgi-file", "wsgi.py", \
+     "--callable", "wsgi_app", \
+     "--master", "--processes", "2", \
+     "--threads", "1", \
+     "--uid", "2000"]
+
