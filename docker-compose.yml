@@ -3,8 +3,6 @@ services:
   lyceum_api:
     image: lyceum-api
     restart: always
-    ports:
-      - "8439:80"
     depends_on:
       - "postgres"
     env_file:
@@ -18,8 +16,6 @@ services:
     restart: always
     env_file:
       - .variables.env
-    ports:
-      - "5432:5432"
     networks:
       default:
 
