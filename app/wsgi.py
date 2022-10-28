@@ -1,50 +1,60 @@
 from flask import Flask
 
 from sqlalchemy_sessions import global_init
+import sqlalchemy as sa
 import db_manager
 
 import os
 import argparse
 from typing import Optional
 import json
+import logging
 
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-s', '--sqlite', default=None)
-    args = parser.parse_args()
-    global_init(f"sqlite:///{args.sqlite}")
-else: 
-# TODO: Add parsing config from args
-#     parser = argparse.ArgumentParser(conflict_handler='resolve')
-#     parser.add_argument('-u', '--user', default=None)
-#     parser.add_argument('-P', '--password', default=None)
-#     parser.add_argument('-H', '--host', default=None)
-#     parser.add_argument('-d', '--database', default=None)
-#     parser.add_argument('-p', '--port', default=None)
-#     args = parser.parse_args()
-#     user = args.user or os.getenv("POSTGRES_USER")
-#     password = args.password or os.getenv("POSTGRES_PASSWORD")
-#     database = args.database or os.getenv("POSTGRES_DB")
-#     port = args.port or os.getenv("POSTGRES_PORT") or 5432
-#     host = args.host or os.getenv("POSTGRES_HOST")
-    user = os.getenv("POSTGRES_USER")
-    password = os.getenv("POSTGRES_PASSWORD")
-    database = os.getenv("POSTGRES_DB")
-    port = os.getenv("POSTGRES_PORT") or 5432
-    host = os.getenv("POSTGRES_HOST")
-
-    global_init(f"postgresql://{user}:{password}@{host}:{port}/{database}")
-
-
-wsgi_app = Flask(__name__)
-
-db_manager.create_default()
 
 right_lessons_type = dict[str, dict[str, str or bool or list[list[int]]]]
 error_msg_type = dict[str, str]
 lessons_type = right_lessons_type | error_msg_type
 page_type = str | bytes
+
+
+logger = logging.getLogger("main")
+logger.setLevel("DEBUG")
+logger.info(f"USE {sa.__version__} SQLALCHEMY VERSION")
+
+
+def init_by_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-s', '--sqlite', default=None)
+    parser.add_argument('-u', '--user', default=None)
+    parser.add_argument('-P', '--password', default=None)
+    parser.add_argument('-H', '--host', default=None)
+    parser.add_argument('-d', '--database', default=None)
+    parser.add_argument('-p', '--port', default=None)
+    args = parser.parse_args()
+    if args.sqlite is not None:
+        global_init(f"sqlite:///{args.sqlite}")
+    else:
+        global_init(f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}")
+
+
+def init_enviroment_variables():
+    user = os.getenv("POSTGRES_USER")
+    password = os.getenv("POSTGRES_PASSWORD")
+    database = os.getenv("POSTGRES_DB")
+    port = os.getenv("POSTGRES_PORT") or 5432
+    host = os.getenv("POSTGRES_HOST")
+    global_init(f"postgresql://{user}:{password}@{host}:{port}/{database}")
+
+
+if __name__ == "__main__":
+    init_by_arguments()
+else:
+    init_enviroment_variables()
+
+
+wsgi_app = Flask(__name__)
+
+db_manager.create_default()
 
 
 def get_lessons(

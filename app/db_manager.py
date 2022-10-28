@@ -6,6 +6,7 @@ from data.teacher import Teacher
 
 from sqlalchemy_sessions import search_func, add_func, edit_func
 from sqlalchemy.orm import Session
+import sqlalchemy as sa
 
 import datetime as dt
 import calendar
@@ -36,10 +37,10 @@ def _create_if_no_exists(db_sess: Session, cls, **kwargs):
         cls - SQLAlchemy Table Class
         **kwargs - object parameters
     """
-    query = db_sess.query(cls).filter_by(**kwargs)
-    if (db_object := query.one_or_none()) is not None:
-        return db_object
-    return _create(db_sess, cls, **kwargs)
+    try:
+        return db_sess.query(cls).filter_by(**kwargs).one()
+    except sa.exc.NoResultFound:
+        return _create(db_sess, cls, **kwargs)
 
 
 @edit_func
@@ -52,22 +53,22 @@ def create_default(db_sess: Session):
                         do not use this argument
     """
     school = _create_if_no_exists(
-        db_sess, School, school_id=1, name="Лицей №2", address="Иркутск"
+        db_sess, School, name="Лицей №2", address="Иркутск"
     )
     teacher = _create_if_no_exists(
-        db_sess, Teacher, teacher_id=1, name="Мария Александровна Зубакова"
+        db_sess, Teacher, name="Мария Александровна Зубакова"
     )
     school_class = _create_if_no_exists(
-        db_sess, SchoolClass, school_class_id=1, number=10, letter='Б',
+        db_sess, SchoolClass, number=10, letter='Б',
         school_id=school.school_id
     )
     subject = _create_if_no_exists(
-        db_sess, Subject, name="Математика", subject_id=1,
+        db_sess, Subject, name="Математика",
         school_class_id=school_class.school_class_id,
         teacher_id=teacher.teacher_id
     )
     _ = _create_if_no_exists(
-        db_sess, Lesson, subject_id=subject.subject_id, lesson_id=1,
+        db_sess, Lesson, subject_id=subject.subject_id,
         teacher_id=teacher.teacher_id, start_time=dt.time(8, 0),
         end_time=dt.time(8, 30), day=0
     )
