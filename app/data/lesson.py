@@ -3,7 +3,7 @@ import sqlalchemy as sa
 
 
 class Lesson(SqlAlchemyBase):
-    __tablename__ = "lessons"
+    __tablename__ = "lessons"  # Привет
 
     lesson_id = sa.Column(
             sa.Integer, primary_key=True, 
