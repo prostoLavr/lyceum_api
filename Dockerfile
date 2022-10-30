@@ -8,7 +8,8 @@ COPY wheels /wheels
 RUN python3 -m pip install --no-cache -r requirements.txt && \
     python3 -m pip install --no-cache /wheels/*
 
-COPY app/ ./
+COPY ./app/ ./app/
+COPY ./wsgi.py ./
 
 CMD ["uwsgi", \ 
      "--http", ":80", \

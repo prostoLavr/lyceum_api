@@ -1,8 +1,5 @@
 from flask import Flask
-
-from sqlalchemy_sessions import global_init
-import sqlalchemy as sa
-import db_manager
+from flask import send_file
 
 import os
 import argparse
@@ -11,52 +8,15 @@ import json
 import logging
 
 
+from app import wsgi_app, db_manager
+
 right_lessons_type = dict[str, dict[str, str or bool or list[list[int]]]]
 error_msg_type = dict[str, str]
 lessons_type = right_lessons_type | error_msg_type
 page_type = str | bytes
 
 
-logger = logging.getLogger("main")
-logger.setLevel("DEBUG")
-logger.info(f"USE {sa.__version__} SQLALCHEMY VERSION")
-print(f"USE {sa.__version__} SQLALCHEMY VERSION")
-
-
-
-def init_by_arguments():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-s', '--sqlite', default=None)
-    parser.add_argument('-u', '--user', default=None)
-    parser.add_argument('-P', '--password', default=None)
-    parser.add_argument('-H', '--host', default=None)
-    parser.add_argument('-d', '--database', default=None)
-    parser.add_argument('-p', '--port', default=None)
-    args = parser.parse_args()
-    if args.sqlite is not None:
-        global_init(f"sqlite:///{args.sqlite}")
-    else:
-        global_init(f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}")
-
-
-def init_enviroment_variables():
-    user = os.getenv("POSTGRES_USER")
-    password = os.getenv("POSTGRES_PASSWORD")
-    database = os.getenv("POSTGRES_DB")
-    port = os.getenv("POSTGRES_PORT") or 5432
-    host = os.getenv("POSTGRES_HOST")
-    global_init(f"postgresql://{user}:{password}@{host}:{port}/{database}")
-
-
-if __name__ == "__main__":
-    init_by_arguments()
-else:
-    init_enviroment_variables()
-
-
-wsgi_app = Flask(__name__)
-
-db_manager.create_default()
+logger = logging.getLogger(__name__)
 
 
 def get_lessons(
@@ -73,6 +33,11 @@ def to_json(data: dict) -> bytes:
 @wsgi_app.route("/school")
 def schools() -> page_type:
     return to_json(db_manager.get_schools())
+
+
+@wsgi_app.route("/school/<int:school_id>/image")
+def school_image(school_id: int) -> page_type:
+    return send_file(f"/images/schools/{school_id}.jpg", mimetype='image/gif')
 
 
 @wsgi_app.route("/school/<int:school_id>/school_class")
@@ -95,3 +60,4 @@ def lessons_for_school_class(school_class_id: int) -> page_type:
 
 if __name__ == "__main__":
     wsgi_app.run("0.0.0.0", 8080)
+

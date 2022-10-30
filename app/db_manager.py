@@ -1,8 +1,8 @@
-from data.lesson import Lesson
-from data.school_class import SchoolClass
-from data.school import School
-from data.subject import Subject
-from data.teacher import Teacher
+from app.data.lesson import Lesson
+from app.data.school_class import SchoolClass
+from app.data.school import School
+from app.data.subject import Subject
+from app.data.teacher import Teacher
 
 from sqlalchemy_sessions import search_func, add_func, edit_func
 from sqlalchemy.orm import Session

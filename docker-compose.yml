@@ -3,10 +3,14 @@ services:
   lyceum_api:
     image: lyceum-api
     restart: always
+    ports:
+      - "8080:80"
     depends_on:
       - "postgres"
     env_file:
       - .variables.env
+    volumes:
+      - "lyceum-images:/images"
     networks:
       front_net:
       default:
@@ -23,3 +27,6 @@ networks:
   front_net:
     external: true
 
+
+volumes:
+  lyceum-images:
