@@ -22,6 +22,12 @@ services:
       - .variables.env
     networks:
       default:
+  test:
+    build: ./test
+    depends_on:
+      - "lyceum_api"
+    networks:
+      default:
 
 networks:
   front_net:
